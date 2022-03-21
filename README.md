@@ -1,138 +1,99 @@
-# Shopify Theme Tailwind CSS
+# Dawn
 
-This repository contains a starting point for Shopify Online Store 2.0 Theme
-development using Tailwind CSS and the default Dawn theme.
+[![Build status](https://github.com/shopify/dawn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shopify/dawn/actions/workflows/ci.yml?query=branch%3Amain)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?color=informational)](/.github/CONTRIBUTING.md)
 
-> :warning: It is possible to use React with this configuration, but
-> [Hydrogen](https://hydrogen.shopify.dev/) might be more useful because it
-> provides a lot of features out-of-the-box.
+[Getting started](#getting-started) |
+[Staying up to date with Dawn changes](#staying-up-to-date-with-dawn-changes) |
+[Developer tools](#developer-tools) |
+[Contributing](#contributing) |
+[Code of conduct](#code-of-conduct) |
+[Theme Store submission](#theme-store-submission) |
+[License](#license)
 
-## Workflow
+Dawn represents a HTML-first, JavaScript-only-as-needed approach to theme development. It's Shopify's first source available theme with performance, flexibility, and [Online Store 2.0 features](https://www.shopify.com/partners/blog/shopify-online-store) built-in and acts as a reference for building Shopify themes.
 
-A short description of this workflow:
+* **Web-native in its purest form:** Themes run on the [evergreen web](https://www.w3.org/2001/tag/doc/evergreen-web/). We leverage the latest web browsers to their fullest, while maintaining support for the older ones through progressive enhancement—not polyfills.
+* **Lean, fast, and reliable:** Functionality and design defaults to “no” until it meets this requirement. Code ships on quality. Themes must be built with purpose. They shouldn’t support each and every feature in Shopify.
+* **JavaScript not required, fails gracefully:** We extract every bit of speed and functionality out of HTTP, semantic HTML, and CSS before writing our first line of JavaScript. JavaScript can only be used to progressively enhance features.
+* **Server-rendered:** HTML must be rendered by Shopify servers using Liquid. Business logic and platform primitives such as translations and money formatting don’t belong on the client. Async and on-demand rendering of parts of the page is OK, but we do it sparingly as a progressive enhancement.
+* **Functional, not pixel-perfect:** The Web doesn’t require each page to be rendered pixel-perfect by each browser engine. Using semantic markup, progressive enhancement, and clever design, we ensure that themes remain functional regardless of the browser.
 
-- Edit theme locally using the Shopify CLI, Tailwind and Webpack
-- Commit changes to feature branch
-- Merge feature branch with main branch once feature is implemented
-- Automatically publish the production build to the `dist` branch using Github
-  Actions
-- Shopify automatically syncs with the `dist` branch.
-
-### Technologies used
-
-- Tailwind CSS
-  - The main css file is located in `src/index.css`
-  - This file will be built to `shopify/assets/index.css`
-- Webpack
-  - All `src/entries/**/*.{js,jsx,ts,tsx}` files will be sourced as webpack
-    entry and the output file can be found in the `assets` directory. All build
-    bundles get the extension `.bundle.js` instead of `.{js,jsx,ts,tsx}`.
-- Shopify CLI
-- Github Actions to deploy the theme to the dist branch on push to the main
-  branch
-- Github Actions to test for build errors on every Pull Request
-
-You can copy the Lighthouse Github Action from the original
-[Dawn theme](https://github.com/Shopify/dawn) repository to track the
-performance of your theme on every push.
-
-### Disadvantages
-
-- Because an extra build step is involved, you need to manually copy changes
-  made in the Shopify theme editor. Those changes will be committed to the
-  `dist` branch.
-- TailwindCSS breaks some default styles of the Dawn theme.
+You can find a more detailed version of our theme code principles in the [contribution guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md#theme-code-principles).
 
 ## Getting started
 
-### Prerequisites
+We recommend using Dawn as a starting point for theme development. [Learn more on Shopify.dev](https://shopify.dev/themes/getting-started/create). 
 
-- [Shopify CLI](https://shopify.dev/themes/getting-started/create#step-1-install-shopify-cli)
-- [Node.js](https://nodejs.org/)
+> If you're building a theme for the Shopify Theme Store, then you can use Dawn as a starting point. However, the theme that you submit needs to be [substantively different from Dawn](https://shopify.dev/themes/store/requirements#uniqueness) so that it provides added value for merchants. Learn about the [ways that you can use Dawn](https://shopify.dev/themes/tools/dawn#ways-to-use-dawn).
 
-### Installation
+## Staying up to date with Dawn changes
 
-1. Run the following commands:
+Say you're building a new theme off Dawn but you still want to be able to pull in the latest changes, you can add a remote `upstream` pointing to this Dawn repository.
 
-   ```bash
-   git clone git@github.com:wesselvanree/shopify-theme-tailwind.git
-   cd shopify-theme-tailwind
-   npm install
-   npm run install-theme
-   rm -rf .git && git init
-   ```
+1. Navigate to your local theme folder.
+2. Verify the list of remotes and validate that you have both an `origin` and `upstream`:
+```sh
+git remote -v
+```
+3. If you don't see an `upstream`, you can add one that points to Shopify's Dawn repository:
+```sh
+git remote add upstream https://github.com/Shopify/dawn.git
+```
+4. Pull in the latest Dawn changes into your repository:
+```sh
+git fetch upstream
+git pull upstream main
+```
 
-   You can remove all `install-theme:*` scripts from your `package.json` because
-   you will not need them anymore. If your default branch is not named `main`,
-   please replace `main` with your default branch name in
-   `.github/workflows/deploy.yml`
+## Developer tools
 
-2. Make sure the TailwindCSS output file (`shopify/assets/index.css`) is
-   included in the `head` of your `shopify/layout/theme.liquid` file.
+There are a number of really useful tools that the Shopify Themes team uses during development. Dawn is already set up to work with these tools.
 
-   ```liquid
-   {{ 'index.css' | asset_url | stylesheet_tag }}
-   ```
+### Shopify CLI
 
-   The same holds for all `.bundle.js` files created by Webpack. You need to
-   insert the script tags on the places where you want to use the Webpack
-   bundle. You can do this with the following line of code:
+[Shopify CLI](https://github.com/Shopify/shopify-cli) helps you build Shopify themes faster and is used to automate and enhance your local development workflow. It comes bundled with a suite of commands for developing Shopify themes—everything from working with themes on a Shopify store (e.g. creating, publishing, deleting themes) or launching a development server for local theme development.
 
-   ```liquid
-   <script src="{{ '[your_script_name].bundle.js' | asset_url }}" defer="defer"></script>
-   ```
+You can follow this [quick start guide for theme developers](https://github.com/Shopify/shopify-cli#quick-start-guide-for-theme-developers) to get started.
 
-3. Once you've pushed your first commit to github, a `dist` branch will be
-   created. Use the Shopify Github integration to sync your theme with the
-   `dist` branch by going to `your admin dashboard` > `Online Store` >
-   `Themes` > `Add Theme` > `Connect from Github`.
+### Theme Check
 
-## Usage
+We recommend using [Theme Check](https://github.com/shopify/theme-check) as a way to validate and lint your Shopify themes.
 
-### Development
+We've added Theme Check to Dawn's [list of VS Code extensions](/.vscode/extensions.json) so if you're using Visual Studio Code as your code editor of choice, you'll be prompted to install the [Theme Check VS Code](https://marketplace.visualstudio.com/items?itemName=Shopify.theme-check-vscode) extension upon opening VS Code after you've forked and cloned Dawn.
 
-You will need 2 terminal windows:
+You can also run it from a terminal with the following Shopify CLI command:
 
-1. Serve your Shopify theme
+```bash
+shopify theme check
+```
 
-   - First, log in to your store if you was not logged in already.
-     ```bash
-     shopify login --store your-store-name.myshopify.com
-     ```
-   - Serve your theme to your development store
-     ```bash
-     npm run shopify
-     ```
+### Continuous Integration
 
-2. Build your code: in a separate terminal window, run `npm start` to start
-   watch for file changes and build development bundles.
+Dawn uses [GitHub Actions](https://github.com/features/actions) to maintain the quality of the theme. [This is a starting point](https://github.com/Shopify/dawn/blob/main/.github/workflows/ci.yml) and what we suggest to use in order to ensure you're building better themes. Feel free to build off of it!
 
-If you prefer to use one single terminal window, you can customize the scripts
-in `package.json` to use the `npm-run-all` package.
+#### Shopify/lighthouse-ci-action
 
-### Production
+We love fast websites! Which is why we created [Shopify/lighthouse-ci-action](https://github.com/Shopify/lighthouse-ci-action). This runs a series of [Google Lighthouse](https://developers.google.com/web/tools/lighthouse) audits for the home, product and collections pages on a store to ensure code that gets added doesn't degrade storefront performance over time.
 
-This repository contains a Github Action that uses
-[JamesIves/github-pages-deploy-action@4.1.4](https://github.com/JamesIves/github-pages-deploy-action).
-This action does not activate Github Pages in your repository but just commits
-the build to another branch. Currently, the action is configured to deploy the
-build to the dist branch. You can easily customize this by editing
-`.github/workflows/deploy.yml`.
+#### Shopify/theme-check-action
 
-Alternatively, you can create the build manually. Run `npm run build` to build
-for production. You can use the
-[Shopify Github integration](https://shopify.dev/themes/getting-started/create#step-6-install-the-shopify-github-integration-and-connect-your-branch-to-your-store)
-to track a branch in your Github repository.
+Dawn runs [Theme Check](#Theme-Check) on every commit via [Shopify/theme-check-action](https://github.com/Shopify/theme-check-action).
 
-## Final notes
+## Contributing
 
-### Further reading
+Want to make commerce better for everyone by contributing to Dawn? We'd love your help! Please read our [contributing guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md) to learn about our development process, how to propose bug fixes and improvements, and how to build for Dawn.
 
-- [shopify.dev](https://shopify.dev)
-- [Tools for building Shopify themes](https://shopify.dev/themes/tools)
-- [Version control for Shopify themes best practices](https://shopify.dev/themes/best-practices/version-control)
+## Code of conduct
 
-### Suggestions
+All developers who wish to contribute through code or issues, please first read our [Code of Conduct](https://github.com/Shopify/dawn/blob/main/.github/CODE_OF_CONDUCT.md).
 
-If you have any suggestions to improve this repository, please open an issue. I
-would be happy to hear from you.
+## Theme Store submission
+
+The [Shopify Theme Store](https://themes.shopify.com/) is the place where Shopify merchants find the themes that they'll use to showcase and support their business. As a theme partner, you can create themes for the Shopify Theme Store and reach an international audience of an ever-growing number of entrepreneurs.
+
+Ensure that you follow the list of [theme store requirements](https://shopify.dev/themes/store/requirements) if you're interested in becoming a [Shopify Theme Partner](https://themes.shopify.com/services/themes/guidelines) and building themes for the Shopify platform.
+
+## License
+
+Copyright (c) 2021-present Shopify Inc. See [LICENSE](/LICENSE.md) for further details.
